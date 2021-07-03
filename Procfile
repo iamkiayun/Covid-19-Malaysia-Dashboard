@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run main.py
+web: gunicorn covid-19:app --log-file -
