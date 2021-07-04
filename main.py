@@ -37,7 +37,7 @@ def load_data():
     chartdata_df['Positivity rate'] = (chartdata_df['newCase']/chartdata_df['newTest'])*100
     chartdata_df['Positivity rate']= chartdata_df['Positivity rate'].round(2)
     chartdata_df['newTest']= chartdata_df['newTest'].replace(0, np.nan)
-    return chartdata_df.to_csv('covid_data_updated_descending.csv')
+    return chartdata_df.to_csv('covid_data_updated_descending.csv', index=False)
 
 
 def last_update():
@@ -66,7 +66,7 @@ def load_data2():
     chartdata_df2['Positivity rate'] = (chartdata_df2['newCase']/chartdata_df2['newTest'])*100
     chartdata_df2['Positivity rate']= chartdata_df2['Positivity rate'].round(2)
     chartdata_df2['newTest']= chartdata_df2['newTest'].replace(0, np.nan)
-    return chartdata_df2.to_csv('covid_data_updated_ascending.csv')
+    return chartdata_df2.to_csv('covid_data_updated_ascending.csv', index=False)
 
 
 def job():
