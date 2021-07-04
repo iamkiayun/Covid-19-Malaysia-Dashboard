@@ -61,6 +61,19 @@ def load_data2():
     chartdata_df2['newTest']= chartdata_df2['newTest'].replace(0, np.nan)
     return chartdata_df2.to_csv('covid_data_updated_ascending.csv')
 
-load_data()
-load_data2()
-last_update()
+
+import schedule
+import time
+
+
+def job():
+    load_data()
+    load_data2()
+    last_update()
+
+schedule.every(2).hours.do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
