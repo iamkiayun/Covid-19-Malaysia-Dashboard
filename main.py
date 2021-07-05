@@ -74,18 +74,11 @@ def job():
     load_data2()
     last_update()
 
-schedule.every().day.at('13:00').do(job)
-schedule.every().day.at('15:00').do(job)
-schedule.every().day.at('17:00').do(job)
-schedule.every().day.at('20:00').do(job)
-schedule.every().day.at('22:00').do(job)
 
 
 
 
-
-
-chartdata_df = pd.read_csv('covid_data_updated_descending.csv', index_col=0)
+chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
 
 # def img_to_bytes(img_path):
 #     img_bytes = Path(img_path).read_bytes()
@@ -126,13 +119,21 @@ st.write(chartdata_df)
 # st.line_chart(chartdata_df)
 
 
-chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv', index_col=0)
+chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
 # chartdata_df2['date'] = pd.to_datetime(chartdata_df2['date'], format= '%d %b %Y')
 # chartdata_df2 = chartdata_df2.sort_values('date')
 # chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
 # chartdata_df2.sort_values(by=['date'], inplace=True)
 graph = px.bar(chartdata_df2, x='date', y='totalCase')
 st.plotly_chart(graph)
+
+
+schedule.every().day.at('13:00').do(job)
+schedule.every().day.at('15:00').do(job)
+schedule.every().day.at('17:00').do(job)
+schedule.every().day.at('20:00').do(job)
+schedule.every().day.at('20:20').do(job)
+schedule.every().day.at('22:00').do(job)
 
 
 while True:
