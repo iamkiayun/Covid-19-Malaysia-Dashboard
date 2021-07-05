@@ -68,11 +68,52 @@ def load_data2():
     chartdata_df2['newTest']= chartdata_df2['newTest'].replace(0, np.nan)
     return chartdata_df2.to_csv('covid_data_updated_ascending.csv', index=False)
 
+def load_vaccine_data():
+    url = "https://newslab.malaysiakini.com/covid-19/en"
+    html = requests.get(url).text
+    bs = BeautifulSoup(html, 'lxml')
+    script = bs.find('script', id='__NEXT_DATA__')
+    json_object = json.loads(script.contents[0])
+    props = json_object['props']
+    page_props = props['pageProps']
+    vaccinedata = page_props['vaccineData']
+    vaccine_df = pd.DataFrame.from_dict(vaccinedata)
+    return vaccine_df.to_csv('vaccine_data_updated_ascending.csv', index=False)
+
+
+def load_districts():
+    url = "https://newslab.malaysiakini.com/covid-19/en"
+    html = requests.get(url).text
+    bs = BeautifulSoup(html, 'lxml')
+    script = bs.find('script', id='__NEXT_DATA__')
+    json_object = json.loads(script.contents[0])
+    props = json_object['props']
+    page_props = props['pageProps']
+    districtsdata = page_props['districtsData']
+    district_df = pd.DataFrame.from_dict(districtsdata)
+    return district_df.to_csv('district_df.csv', index=False)
+
+def load_cluster():
+    url = "https://newslab.malaysiakini.com/covid-19/en"
+    html = requests.get(url).text
+    bs = BeautifulSoup(html, 'lxml')
+    script = bs.find('script', id='__NEXT_DATA__')
+    json_object = json.loads(script.contents[0])
+    props = json_object['props']
+    page_props = props['pageProps']
+    clusterdata = page_props['clustersData']
+    cluster_df = pd.DataFrame.from_dict(clusterdata)
+    return cluster_df.to_csv('cluster_df.csv', index= False)
+
+
+
+
 
 def job():
     load_data()
     load_data2()
     last_update()
+    load_vaccine_data()
 
 
 
@@ -124,16 +165,44 @@ chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
 # chartdata_df2 = chartdata_df2.sort_values('date')
 # chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
 # chartdata_df2.sort_values(by=['date'], inplace=True)
-graph = px.bar(chartdata_df2, x='date', y='totalCase')
+graph = px.bar(chartdata_df2, x='date', y='totalCase',
+               labels={
+                   'date': '',
+                   'totalCase':''
+               },
+               title='Confirmed cases')
 st.plotly_chart(graph)
 
+vaccine_df = pd.read_csv('vaccine_data_updated_ascending.csv')
+vaccine_cumul = px.bar(vaccine_df, x='date', y='total_cumul',
+                       labels={
+                           "date": "",
+                           "total_cumul": "Total cumulative"
+                       },
+                       title='National vaccination progress')
+st.plotly_chart(vaccine_cumul)
+#total population is estimated at 32.65 million
 
-schedule.every().day.at('13:00').do(job)
-schedule.every().day.at('15:00').do(job)
-schedule.every().day.at('17:00').do(job)
+
+# st.markdown(graph)
+vaccine_daily = px.bar(vaccine_df, x='date', y='total_daily',
+                       labels= {
+                           "date": "",
+                           "total_daily": ""
+                       },
+                       title='Daily vaccine doses administered')
+# vaccine_daily.update_layout()
+st.plotly_chart(vaccine_daily)
+#average of xxx doses a day in the past 14 days
+
+
+
+
+
+schedule.every().day.at('07:00').do(job)
+schedule.every().day.at('19:20').do(job)
+schedule.every().day.at('19:30').do(job)
 schedule.every().day.at('20:00').do(job)
-schedule.every().day.at('20:20').do(job)
-schedule.every().day.at('22:00').do(job)
 
 
 while True:
