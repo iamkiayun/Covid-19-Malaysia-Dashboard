@@ -120,6 +120,7 @@ def job():
 
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
+chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
 
 # def img_to_bytes(img_path):
 #     img_bytes = Path(img_path).read_bytes()
@@ -155,12 +156,17 @@ state_select = st.sidebar.selectbox('State', states)
 status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
 # selected_state =
 
+new_cases, active_cases = st.beta_columns(2)
+with new_cases:
+    st.markdown('**New Cases**')
+
 
 st.write(chartdata_df)
 # st.line_chart(chartdata_df)
 
 
-chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
+
+
 # chartdata_df2['date'] = pd.to_datetime(chartdata_df2['date'], format= '%d %b %Y')
 # chartdata_df2 = chartdata_df2.sort_values('date')
 # chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
