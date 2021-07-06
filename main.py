@@ -19,101 +19,57 @@ import schedule
 import time
 
 @st.cache(allow_output_mutation=True)
-def load_data():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props= props['pageProps']
-    chartdata= page_props['chartData']
-    data=chartdata
+def scrape_kini_labs():
+    # descending df
     chartdata_df = pd.DataFrame.from_dict(data)
     chartdata_df['date'] = pd.to_datetime(chartdata_df['date'], utc=False)
     chartdata_df.sort_values(by=['date'], ascending=False, inplace=True)
     chartdata_df['date'] = chartdata_df['date'].dt.strftime('%d %b %y')
     chartdata_df['Positivity rate'] = pd.to_numeric(chartdata_df['Positivity rate'], errors='coerce')
-    chartdata_df['Positivity rate'] = (chartdata_df['newCase']/chartdata_df['newTest'])*100
-    chartdata_df['Positivity rate']= chartdata_df['Positivity rate'].round(2)
-    chartdata_df['newTest']= chartdata_df['newTest'].replace(0, np.nan)
-    return chartdata_df.to_csv('covid_data_updated_descending.csv', index=False)
+    chartdata_df['Positivity rate'] = (chartdata_df['newCase'] / chartdata_df['newTest']) * 100
+    chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'].round(2)
+    chartdata_df['newTest'] = chartdata_df['newTest'].replace(0, np.nan)
+    chartdata_df.to_csv('covid_data_updated_descending.csv', index=False)
 
-
-def last_update():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    updated_date = bs.find('div', class_='jsx-2630654232 uk-text-small uk-text-center')
-    with open('update_datetime.txt', 'w') as f:
-        f.write(updated_date.text)
-
-def load_data2():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props= props['pageProps']
-    chartdata= page_props['chartData']
-    data=chartdata
+    # ascending df
     chartdata_df2 = pd.DataFrame.from_dict(data)
     chartdata_df2['date'] = pd.to_datetime(chartdata_df2['date'], utc=False)
     chartdata_df2.sort_values(by=['date'], ascending=True, inplace=True)
     chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
     chartdata_df2['Positivity rate'] = pd.to_numeric(chartdata_df2['Positivity rate'], errors='coerce')
-    chartdata_df2['Positivity rate'] = (chartdata_df2['newCase']/chartdata_df2['newTest'])*100
-    chartdata_df2['Positivity rate']= chartdata_df2['Positivity rate'].round(2)
-    chartdata_df2['newTest']= chartdata_df2['newTest'].replace(0, np.nan)
-    return chartdata_df2.to_csv('covid_data_updated_ascending.csv', index=False)
+    chartdata_df2['Positivity rate'] = (chartdata_df2['newCase'] / chartdata_df2['newTest']) * 100
+    chartdata_df2['Positivity rate'] = chartdata_df2['Positivity rate'].round(2)
+    chartdata_df2['newTest'] = chartdata_df2['newTest'].replace(0, np.nan)
+    chartdata_df2.to_csv('covid_data_updated_ascending.csv', index=False)
 
-def load_vaccine_data():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props = props['pageProps']
+    # updated text
+    updated_date = bs.find('div', class_='jsx-2630654232 uk-text-small uk-text-center')
+    with open('update_datetime.txt', 'w') as f:
+        f.write(updated_date.text)
+
+    # vaccine data
     vaccinedata = page_props['vaccineData']
     vaccine_df = pd.DataFrame.from_dict(vaccinedata)
-    return vaccine_df.to_csv('vaccine_data_updated_ascending.csv', index=False)
+    vaccine_df.to_csv('vaccine_data_updated_ascending.csv', index=False)
 
-
-def load_districts():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props = props['pageProps']
+    # districts
     districtsdata = page_props['districtsData']
     district_df = pd.DataFrame.from_dict(districtsdata)
-    return district_df.to_csv('district_df.csv', index=False)
+    district_df.to_csv('district_df.csv', index=False)
 
-def load_cluster():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props = props['pageProps']
+    # cluster
     clusterdata = page_props['clustersData']
     cluster_df = pd.DataFrame.from_dict(clusterdata)
-    return cluster_df.to_csv('cluster_df.csv', index= False)
+    cluster_df.to_csv('cluster_df.csv', index=False)
+
+    return 'update_datetime.txt', 'vaccine_data_updated_ascending.csv', 'district_df.csv', 'cluster_df.csv', 'covid_data_updated_descending.csv', 'covid_data_updated_ascending.csv'
 
 
 
 
 
 def job():
-    load_data()
-    load_data2()
-    last_update()
-    load_vaccine_data()
+    scrape_kini_labs()
 
 
 
@@ -200,6 +156,15 @@ vaccine_daily = px.bar(vaccine_df, x='date', y='total_daily',
 # vaccine_daily.update_layout()
 st.plotly_chart(vaccine_daily)
 #average of xxx doses a day in the past 14 days
+
+
+# vax_malaysia_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_malaysia.csv')
+# vax_state_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_state.csv')
+# population_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/static/population.csv')
+
+
+
+
 
 
 
