@@ -20,6 +20,15 @@ import time
 
 @st.cache(allow_output_mutation=True)
 def scrape_kini_labs():
+    url = "https://newslab.malaysiakini.com/covid-19/en"
+    html = requests.get(url).text
+    bs = BeautifulSoup(html, 'lxml')
+    script = bs.find('script', id='__NEXT_DATA__')
+    json_object = json.loads(script.contents[0])
+    props = json_object['props']
+    page_props = props['pageProps']
+    chartdata = page_props['chartData']
+    data = chartdata
     # descending df
     chartdata_df = pd.DataFrame.from_dict(data)
     chartdata_df['date'] = pd.to_datetime(chartdata_df['date'], utc=False)
