@@ -18,7 +18,7 @@ import json
 import schedule
 import time
 
-@st.cache(allow_output_mutation=True)
+# @st.cache(allow_output_mutation=True)
 def scrape_kini_labs():
     url = "https://newslab.malaysiakini.com/covid-19/en"
     html = requests.get(url).text
@@ -29,6 +29,7 @@ def scrape_kini_labs():
     page_props = props['pageProps']
     chartdata = page_props['chartData']
     data = chartdata
+
     # descending df
     chartdata_df = pd.DataFrame.from_dict(data)
     chartdata_df['date'] = pd.to_datetime(chartdata_df['date'], utc=False)
@@ -73,15 +74,10 @@ def scrape_kini_labs():
 
     return 'update_datetime.txt', 'vaccine_data_updated_ascending.csv', 'district_df.csv', 'cluster_df.csv', 'covid_data_updated_descending.csv', 'covid_data_updated_ascending.csv'
 
-
-
-
-
 def job():
     scrape_kini_labs()
 
-
-
+scrape_kini_labs()
 
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
@@ -101,6 +97,12 @@ chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
 
 # image = Image.open('coronavirus-image-iStock-628925532-1200px.jpg')
 # st.image(image, width=None)
+
+
+start_button = st.empty()
+if start_button.button('Refresh', key='start'):
+    start_button.empty()
+
 st.title('Covid-19 Malaysia')
 update_date = open('update_datetime.txt', 'r')
 # date = update_date.read()
@@ -179,12 +181,14 @@ st.plotly_chart(vaccine_daily)
 
 
 
-schedule.every().day.at('07:00').do(job)
-schedule.every().day.at('19:20').do(job)
-schedule.every().day.at('19:30').do(job)
-schedule.every().day.at('20:00').do(job)
+# schedule.every().day.at('07:00').do(job)
+# schedule.every().day.at('19:20').do(job)
+# schedule.every().day.at('19:30').do(job)
+# schedule.every().day.at('20:00').do(job)
+# schedule.every(1).second.do(job)
+# st.experimental_rerun()
 
-
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# #
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
