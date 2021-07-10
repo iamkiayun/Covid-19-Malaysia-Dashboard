@@ -76,8 +76,10 @@ def scrape_kini_labs():
 
 def job():
     scrape_kini_labs()
-
-scrape_kini_labs()
+try:
+    scrape_kini_labs()
+except Exception:
+    pass
 
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
