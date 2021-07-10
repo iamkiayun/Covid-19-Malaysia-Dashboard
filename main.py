@@ -74,16 +74,20 @@ def scrape_kini_labs():
 
     return 'update_datetime.txt', 'vaccine_data_updated_ascending.csv', 'district_df.csv', 'cluster_df.csv', 'covid_data_updated_descending.csv', 'covid_data_updated_ascending.csv'
 
-def job():
-    scrape_kini_labs()
-try:
-    scrape_kini_labs()
-except Exception:
-    pass
+# def job():
+#     scrape_kini_labs()
+# try:
+#     scrape_kini_labs()
+# except Exception:
+#     pass
 
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
 chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
+vax_malaysia_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_malaysia.csv')
+vax_state_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_state.csv')
+population_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/static/population.csv')
+vaccine_df = pd.read_csv('vaccine_data_updated_ascending.csv')
 
 # def img_to_bytes(img_path):
 #     img_bytes = Path(img_path).read_bytes()
@@ -125,21 +129,36 @@ state_select = st.sidebar.selectbox('State', states)
 status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
 # selected_state =
 
-new_cases, active_cases = st.beta_columns(2)
+new_cases, new_death, total_case, total_Icu,  = st.beta_columns(4)
 with new_cases:
     st.markdown('**New Cases**')
+    new_case_no = chartdata_df['newCase'].iloc[0]
+    total_test_conducted = chartdata_df['newTest'].iloc[0]
+    positive_rate = chartdata_df['Positivity rate'].iloc[0]
+    st.markdown(f"<h3 style='text-align: left;'>{new_case_no}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>test: {int(total_test_conducted)}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
 
 
-st.write(chartdata_df)
-# st.line_chart(chartdata_df)
+with new_death:
+    st.markdown('**New Deaths**')
+
+with total_case:
+    st.markdown('**Total Cases**')
+
+with total_Icu:
+    st.markdown('**Current ICU**')
 
 
+# st.write(chartdata_df)
+chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'] .map('{:,.2f}'.format)
+column_list = chartdata_df.drop(['date','Positivity rate'], axis=1).columns.tolist()
+chartdata_df[column_list] = chartdata_df[column_list].fillna(0).astype(dtype=int)
+s = chartdata_df.style.format('{:,}', subset=column_list)
+st.dataframe(s)
 
 
-# chartdata_df2['date'] = pd.to_datetime(chartdata_df2['date'], format= '%d %b %Y')
-# chartdata_df2 = chartdata_df2.sort_values('date')
-# chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
-# chartdata_df2.sort_values(by=['date'], inplace=True)
+#cummulative confirmed cases
 graph = px.bar(chartdata_df2, x='date', y='totalCase',
                labels={
                    'date': '',
@@ -148,32 +167,62 @@ graph = px.bar(chartdata_df2, x='date', y='totalCase',
                title='Confirmed cases')
 st.plotly_chart(graph)
 
-vaccine_df = pd.read_csv('vaccine_data_updated_ascending.csv')
-vaccine_cumul = px.bar(vaccine_df, x='date', y='total_cumul',
+# positive rate
+positive_rate_daily = px.bar(chartdata_df2, x='date', y='Positivity rate',
+                       labels= {
+                           "date": "",
+                           "total_daily": "Positivity Rate (%)"
+                       },
+                       title='Daily Positivity Rate')
+
+st.plotly_chart(positive_rate_daily)
+
+
+
+st.header('National Vaccination Progress')
+
+
+#cummulative vaccine
+
+# vaccine_cumul = px.bar(vaccine_df, x='date', y='total_cumul',
+#                        labels={
+#                            "date": "",
+#                            "total_cumul": "Total cumulative"
+#                        },
+#                        title='Total cummulative vaccine doses administered (1st dose + 2nd dose)')
+# st.plotly_chart(vaccine_cumul)
+#total population is estimated at 32.65 million
+total_pop = population_df.iloc[0]['pop']
+vaccine_df['total_cum/total_pop'] = vaccine_df['dose2_cumul']/ total_pop*100
+vaccine_population = px.line(vaccine_df, x='date', y='total_cum/total_pop',
                        labels={
                            "date": "",
-                           "total_cumul": "Total cumulative"
+                           "total_cum/total_pop": "Total 2nd Dose / Total Population (%)"
                        },
-                       title='National vaccination progress')
-st.plotly_chart(vaccine_cumul)
-#total population is estimated at 32.65 million
+                       title='Population fully vaccinated (completed 1st & 2nd dose)')
+st.plotly_chart(vaccine_population)
 
 
-# st.markdown(graph)
+
+
+# daily vaccine
 vaccine_daily = px.bar(vaccine_df, x='date', y='total_daily',
                        labels= {
                            "date": "",
                            "total_daily": ""
                        },
-                       title='Daily vaccine doses administered')
+                       title='Daily vaccine doses administered (1st dose + 2nd dose)')
 # vaccine_daily.update_layout()
 st.plotly_chart(vaccine_daily)
+
 #average of xxx doses a day in the past 14 days
 
 
-# vax_malaysia_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_malaysia.csv')
-# vax_state_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_state.csv')
-# population_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/static/population.csv')
+
+
+
+
+
 
 
 
