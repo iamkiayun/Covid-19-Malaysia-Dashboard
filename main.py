@@ -87,6 +87,8 @@ chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
 vax_malaysia_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_malaysia.csv')
 vax_state_citf_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/vaccination/vax_state.csv')
 population_df = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/static/population.csv')
+vax_reg_malaysia = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/registration/vaxreg_malaysia.csv')
+vax_reg_state = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/registration/vaxreg_state.csv')
 vaccine_df = pd.read_csv('vaccine_data_updated_ascending.csv')
 
 # def img_to_bytes(img_path):
@@ -115,7 +117,7 @@ update_date = open('update_datetime.txt', 'r')
 st.text(f'{update_date.read()}')
 st.markdown("""
 This app performs simple visualization of covid-19 status in Malaysia
-* **Data source:** 1. [KKM's daily report](https://t.me/cprckkm) 2. [Malaysia's National Covid-19 Immunisation Programme](https://github.com/CITF-Malaysia/citf-public)
+* **Data source:** 1. [KKM's daily report](https://t.me/cprckkm) 2. [Covid-19 Immunisation Task Force (CITF)](https://github.com/CITF-Malaysia/citf-public)
 """)
 st.text("")
 st.text("")
@@ -176,8 +178,7 @@ with Discharge:
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Discharged</h4>",unsafe_allow_html=True)
     st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDischarged}</h4>",unsafe_allow_html=True)
     st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*total discharged: {totalDischarged}</h5>",unsafe_allow_html=True)
-    st.markdown(
-        f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate}%</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate}%</h5>",unsafe_allow_html=True)
 
 # st.write(chartdata_df)
 # chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'] .map('{:,.2f}'.format)
@@ -202,7 +203,7 @@ graph_daily = px.bar(chartdata_df2, x='date', y='newCase',
                    'date': '',
                    'newCase':''
                },
-               title='Daily confirmed cases')
+               title='Daily new cases')
 st.plotly_chart(graph_daily)
 
 # positive rate
@@ -219,16 +220,68 @@ st.plotly_chart(positive_rate_daily)
 
 st.header('National Vaccination Progress')
 
+daily_doses, vaccination_progress, vaccinated_percent = st.beta_columns(3)
+# vax_malaysia_citf_df['total_daily']
 
-#cummulative vaccine
+with daily_doses:
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Doses </h4>",unsafe_allow_html=True)
+    # st.markdown('**New Cases**')
+    daily_total_jab = round(vax_malaysia_citf_df['total_daily'].iloc[-1]/1000,2)
+    daily_1st_jab = round(vax_malaysia_citf_df['dose1_daily'].iloc[-1]/1000,2)
+    daily_2nd_jab = round(vax_malaysia_citf_df['dose2_daily'].iloc[-1]/1000,2)
 
-# vaccine_cumul = px.bar(vaccine_df, x='date', y='total_cumul',
-#                        labels={
-#                            "date": "",
-#                            "total_cumul": "Total cumulative"
-#                        },
-#                        title='Total cummulative vaccine doses administered (1st dose + 2nd dose)')
-# st.plotly_chart(vaccine_cumul)
+    # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{daily_total_jab}K</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {daily_1st_jab}K</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*2nd dose: {int(daily_2nd_jab)}K</h5>", unsafe_allow_html=True)
+    # st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
+    st.text("")
+    st.text("")
+    st.text("")
+
+with vaccination_progress:
+    vax_total_cumul = round(vax_malaysia_citf_df['total_cumul'].iloc[-1]/1000000,2)
+    vax_1st_cumul = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)
+    vax_2nd_cumul = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>Total Administered</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{vax_total_cumul}M</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {vax_1st_cumul}M</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*2nd dose: {vax_2nd_cumul}M</h5>",unsafe_allow_html=True)
+
+
+with vaccinated_percent:
+    population_1st = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)
+    population_2nd = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1] / population_df['pop'].iloc[0]*100, 2)
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>Vaccination Progress</h4>", unsafe_allow_html=True)
+    st.text('')
+    st.text('')
+    st.text('')
+    # st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>x</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*fully inoculated: {population_2nd}%</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*received 1 dose: {population_1st}%</h5>", unsafe_allow_html=True)
+
+
+#resitration, target population to be vaccinated
+data= {'type':['registered_ind','ind_1st_dose', 'ind_2nd_dose'],
+       'total':[round(vax_reg_malaysia['total'].iloc[-1],2),
+                round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1],2),
+                round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1],2)]}
+compare_df = pd.DataFrame(data=data)
+target = px.bar(compare_df, x='total', y='type', orientation='h')
+
+target.update_layout(yaxis_title='', xaxis_title='', showlegend=False, legend_title_text= '')
+target.update_layout(title='Vaccination Target')
+target.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
+                  marker_line_width=1.5, opacity=0.6)
+
+st.plotly_chart(target)
+
+
+
+
+
+print (compare_df)
+
 #total population is estimated at 32.65 million
 total_pop = population_df.iloc[0]['pop']
 vaccine_df['total_cum/total_pop'] = vaccine_df['dose2_cumul']/ total_pop*100
@@ -246,7 +299,7 @@ def custom_legend_name(fig, new_names):
     for i, new_name in enumerate(new_names):
         fig.data[i].name = new_name
 
-custom_legend_name(fig=vaccine_population, new_names=['1st dose', '2nd dose'])
+custom_legend_name(fig=vaccine_population, new_names=['received 1st dose', 'fully inoculated with 2nd dose'])
 
 vaccine_population.update_yaxes( # the y-axis is in dollars
      ticksuffix='%',showgrid=True, showticklabels=True            #tickprefix=""
