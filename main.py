@@ -143,9 +143,9 @@ with new_cases:
     totalDeath = chartdata_df['totalDeath'].iloc[0]
     # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
     st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{new_case_no}</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>total cases: {totalCase}</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='text-align: left;'>new test: {int(total_test_conducted)}</h5>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='text-align: left;'>+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total cases: {totalCase}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*new test: {int(total_test_conducted)}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
     st.text("")
     st.text("")
     st.text("")
@@ -153,7 +153,7 @@ with new_cases:
 with new_death:
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Deaths</h4>",unsafe_allow_html=True)
     st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDeath}</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>total deaths: {totalDeath}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total deaths: {totalDeath}</h5>",unsafe_allow_html=True)
 
 
 with total_Icu:
@@ -169,15 +169,15 @@ with total_Icu:
     cure_rate = round(chartdata_df['totalDischarged'].iloc[0]/ chartdata_df['totalCase'].iloc[0]*100,2)
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New ICU</h4>", unsafe_allow_html=True)
     st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newIcu}</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>current Icu: {totalIcu}</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>intubated: {totalIntubated}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*current Icu: {totalIcu}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*intubated: {totalIntubated}</h5>", unsafe_allow_html=True)
 
 with Discharge:
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Discharged</h4>",unsafe_allow_html=True)
     st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDischarged}</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>total discharged: {totalDischarged}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*total discharged: {totalDischarged}</h5>",unsafe_allow_html=True)
     st.markdown(
-        f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>cure rate: {cure_rate}%</h5>",unsafe_allow_html=True)
+        f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate}%</h5>",unsafe_allow_html=True)
 
 # st.write(chartdata_df)
 # chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'] .map('{:,.2f}'.format)
@@ -232,26 +232,105 @@ st.header('National Vaccination Progress')
 #total population is estimated at 32.65 million
 total_pop = population_df.iloc[0]['pop']
 vaccine_df['total_cum/total_pop'] = vaccine_df['dose2_cumul']/ total_pop*100
-vaccine_population = px.line(vaccine_df, x='date', y='total_cum/total_pop',
-                       labels={
-                           "date": "",
-                           "total_cum/total_pop": "Total 2nd Dose / Total Population (%)"
-                       },
-                       title='Population fully vaccinated (completed 1st & 2nd dose)')
+vaccine_df['first/total_pop'] = vaccine_df['dose1_cumul']/ total_pop*100
+vaccine_population = px.line(vaccine_df, x='date', y=['first/total_pop','total_cum/total_pop'],
+                       labels={'first/total_pop': '1st dose',
+                                'total_cum/total_pop': '2nd dose'},
+                       title='Population vaccination progress',
+                       template='simple_white',
+                       color_discrete_map={'first/total_pop': '#009dc4',
+                                            'total_cum/total_pop': '#a88905'}
+                         )
+
+def custom_legend_name(fig, new_names):
+    for i, new_name in enumerate(new_names):
+        fig.data[i].name = new_name
+
+custom_legend_name(fig=vaccine_population, new_names=['1st dose', '2nd dose'])
+
+vaccine_population.update_yaxes( # the y-axis is in dollars
+     ticksuffix='%',showgrid=True, showticklabels=True            #tickprefix=""
+)
+
+vaccine_population.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text= ''
+                                 )
+# vaccine_population.add_trace(go.Scatter(x=[vaccine_df['date'].iloc[-1]],
+#                          y=[vaccine_df['first/total_pop'].iloc[-1]],
+#                          text=[vaccine_df['first/total_pop'].iloc[-1]],
+#                          mode='markers+text',
+#                          marker=dict(color='red', size=10),
+#                          textfont=dict(color='green', size=20),
+#                          textposition='top right',
+#                           showlegend=False))
+vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],
+                               y=[vaccine_df.iloc[-2]['total_cum/total_pop']],
+                               text=[f"{round(vaccine_df.iloc[-2]['total_cum/total_pop'],2)}%"],
+                               mode='markers+text',
+                               marker=dict(color='#a88905', size=1),
+                               # textfont=dict(color='', size=20),
+                               textposition='middle left',
+                               showlegend=False)
+
+vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],
+                               y=[vaccine_df.iloc[-2]['first/total_pop']],
+                               text=[f"{round(vaccine_df.iloc[-2]['first/total_pop'],2)}%"],
+                               mode='markers+text',
+                               marker=dict(color='#009dc4', size=1),
+                               # textfont=dict(color='', size=20),
+                               textposition='middle left',
+                               showlegend=False)
+
+
+#
+# vaccine_population.add_annotation(x='2021-05-09', #[vaccine_df['date'].iloc[-1]]
+#                                   y='10',  #[vaccine_df['total_cum/total_pop'].iloc[-1]]
+#                                   textposition='bottom',
+#                                   text='xxxxxxx',
+#                                   showarrow=True,
+#                                   arrowhead=1
+#                                   )
+
+
+
+
+
 st.plotly_chart(vaccine_population)
 
 
 
-
 # daily vaccine
-vaccine_daily = px.bar(vaccine_df, x='date', y='total_daily',
+vaccine_daily = px.bar(vaccine_df, x='date', y=['dose1_daily','dose2_daily'],
+                       template='simple_white',
                        labels= {
                            "date": "",
-                           "total_daily": ""
+                           "dose1_daily": "1st dose",
+                           "dose2_daily": "2nd dose"
                        },
-                       title='Daily vaccine doses administered (1st dose + 2nd dose)')
-# vaccine_daily.update_layout()
+                       title='Daily vaccine doses administered',
+                       #color_discrete_sequence=px.colors.sequential.Plasma_r
+                       color_discrete_map={'dose1_daily':'#009dc4',    #rgba(255,0,0,0.4)      #FFA15A    #46039F      #3EB489
+                                            'dose2_daily':'#a88905'}   #E1AD01
+
+                       )
+vaccine_daily.update_yaxes( # the y-axis is in dollars
+    tickprefix="", showgrid=True, showticklabels=True
+)
+vaccine_daily.update_xaxes( # the y-axis is in dollars
+    tickprefix="", showgrid=False
+)
+
+# vaccine_daily.update_traces(marker_color=['green', 'blue'])
+vaccine_daily.update_layout(yaxis_title=None, legend_title_text='')
+
+custom_legend_name(fig=vaccine_daily,new_names=['1st dose', '2nd dose'])
+# vaccine_daily.data[0].marker.line.color = ""
+
+
 st.plotly_chart(vaccine_daily)
+
+
+# daily vaccine
+
 
 #average of xxx doses a day in the past 14 days
 
