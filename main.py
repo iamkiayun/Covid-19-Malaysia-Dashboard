@@ -254,14 +254,7 @@ vaccine_population.update_yaxes( # the y-axis is in dollars
 
 vaccine_population.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text= ''
                                  )
-# vaccine_population.add_trace(go.Scatter(x=[vaccine_df['date'].iloc[-1]],
-#                          y=[vaccine_df['first/total_pop'].iloc[-1]],
-#                          text=[vaccine_df['first/total_pop'].iloc[-1]],
-#                          mode='markers+text',
-#                          marker=dict(color='red', size=10),
-#                          textfont=dict(color='green', size=20),
-#                          textposition='top right',
-#                           showlegend=False))
+
 vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],
                                y=[vaccine_df.iloc[-2]['total_cum/total_pop']],
                                text=[f"{round(vaccine_df.iloc[-2]['total_cum/total_pop'],2)}%"],

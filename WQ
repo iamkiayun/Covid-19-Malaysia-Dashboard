@@ -1,0 +1,20 @@
+[1mdiff --git a/main.py b/main.py[m
+[1mindex e312fd0..9634de3 100644[m
+[1m--- a/main.py[m
+[1m+++ b/main.py[m
+[36m@@ -254,14 +254,7 @@[m [mvaccine_population.update_yaxes( # the y-axis is in dollars[m
+ [m
+ vaccine_population.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text= ''[m
+                                  )[m
+[31m-# vaccine_population.add_trace(go.Scatter(x=[vaccine_df['date'].iloc[-1]],[m
+[31m-#                          y=[vaccine_df['first/total_pop'].iloc[-1]],[m
+[31m-#                          text=[vaccine_df['first/total_pop'].iloc[-1]],[m
+[31m-#                          mode='markers+text',[m
+[31m-#                          marker=dict(color='red', size=10),[m
+[31m-#                          textfont=dict(color='green', size=20),[m
+[31m-#                          textposition='top right',[m
+[31m-#                           showlegend=False))[m
+[32m+[m
+ vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],[m
+                                y=[vaccine_df.iloc[-2]['total_cum/total_pop']],[m
+                                text=[f"{round(vaccine_df.iloc[-2]['total_cum/total_pop'],2)}%"],[m
