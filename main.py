@@ -9,78 +9,19 @@ from PIL import Image
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from view_script import *
 #scraping
 import requests
 from bs4 import BeautifulSoup
 import json
+from scraper_covid import scrape_kini_labs
 
 #time
 import schedule
 import time
 
-# @st.cache(allow_output_mutation=True)
-def scrape_kini_labs():
-    url = "https://newslab.malaysiakini.com/covid-19/en"
-    html = requests.get(url).text
-    bs = BeautifulSoup(html, 'lxml')
-    script = bs.find('script', id='__NEXT_DATA__')
-    json_object = json.loads(script.contents[0])
-    props = json_object['props']
-    page_props = props['pageProps']
-    chartdata = page_props['chartData']
-    data = chartdata
-
-    # descending df
-    chartdata_df = pd.DataFrame.from_dict(data)
-    chartdata_df['date'] = pd.to_datetime(chartdata_df['date'], utc=False)
-    chartdata_df.sort_values(by=['date'], ascending=False, inplace=True)
-    chartdata_df['date'] = chartdata_df['date'].dt.strftime('%d %b %y')
-    chartdata_df['Positivity rate'] = pd.to_numeric(chartdata_df['Positivity rate'], errors='coerce')
-    chartdata_df['Positivity rate'] = (chartdata_df['newCase'] / chartdata_df['newTest']) * 100
-    chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'].round(2)
-    chartdata_df['newTest'] = chartdata_df['newTest'].replace(0, np.nan)
-    chartdata_df.to_csv('covid_data_updated_descending.csv', index=False)
-
-    # ascending df
-    chartdata_df2 = pd.DataFrame.from_dict(data)
-    chartdata_df2['date'] = pd.to_datetime(chartdata_df2['date'], utc=False)
-    chartdata_df2.sort_values(by=['date'], ascending=True, inplace=True)
-    chartdata_df2['date'] = chartdata_df2['date'].dt.strftime('%d %b %y')
-    chartdata_df2['Positivity rate'] = pd.to_numeric(chartdata_df2['Positivity rate'], errors='coerce')
-    chartdata_df2['Positivity rate'] = (chartdata_df2['newCase'] / chartdata_df2['newTest']) * 100
-    chartdata_df2['Positivity rate'] = chartdata_df2['Positivity rate'].round(2)
-    chartdata_df2['newTest'] = chartdata_df2['newTest'].replace(0, np.nan)
-    chartdata_df2.to_csv('covid_data_updated_ascending.csv', index=False)
-
-    # updated text
-    updated_date = bs.find('div', class_='jsx-2630654232 uk-text-small uk-text-center')
-    with open('update_datetime.txt', 'w') as f:
-        f.write(updated_date.text)
-
-    # vaccine data
-    vaccinedata = page_props['vaccineData']
-    vaccine_df = pd.DataFrame.from_dict(vaccinedata)
-    vaccine_df.to_csv('vaccine_data_updated_ascending.csv', index=False)
-
-    # districts
-    districtsdata = page_props['districtsData']
-    district_df = pd.DataFrame.from_dict(districtsdata)
-    district_df.to_csv('district_df.csv', index=False)
-
-    # cluster
-    clusterdata = page_props['clustersData']
-    cluster_df = pd.DataFrame.from_dict(clusterdata)
-    cluster_df.to_csv('cluster_df.csv', index=False)
-
-    return 'update_datetime.txt', 'vaccine_data_updated_ascending.csv', 'district_df.csv', 'cluster_df.csv', 'covid_data_updated_descending.csv', 'covid_data_updated_ascending.csv'
-
-# def job():
-#     scrape_kini_labs()
-# try:
-#     scrape_kini_labs()
-# except Exception:
-#     pass
-
+"""to activate back"""
+# scrape_kini_labs()
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
 chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
@@ -91,25 +32,11 @@ vax_reg_malaysia = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/
 vax_reg_state = pd.read_csv('https://raw.githubusercontent.com/CITF-Malaysia/citf-public/main/registration/vaxreg_state.csv')
 vaccine_df = pd.read_csv('vaccine_data_updated_ascending.csv')
 
-# def img_to_bytes(img_path):
-#     img_bytes = Path(img_path).read_bytes()
-#     encoded = base64.b64encode(img_bytes).decode()
-#     return encoded
-#
-# header_html = "<img src='data:image/png;base64,{}' class='img-fluid'>".format(
-#     img_to_bytes("header.png")
-# )
-# st.markdown(
-#     header_html, unsafe_allow_html=True,
-# )
-
-# image = Image.open('coronavirus-image-iStock-628925532-1200px.jpg')
-# st.image(image, width=None)
 
 
-start_button = st.empty()
-if start_button.button('Refresh', key='start'):
-    start_button.empty()
+# start_button = st.empty()
+# if start_button.button('Refresh', key='start'):
+#     start_button.empty()
 
 st.title('Covid-19 Malaysia')
 update_date = open('update_datetime.txt', 'r')
@@ -189,34 +116,13 @@ st.dataframe(chartdata_df.style.format('{:,}', subset=column_list))
 
 
 #cummulative confirmed cases
-graph = px.bar(chartdata_df2, x='date', y='totalCase',
-               labels={
-                   'date': '',
-                   'totalCase':''
-               },
-               title='Cumulative confirmed cases')
-st.plotly_chart(graph)
+st.plotly_chart(cumul_confirm_cases(chartdata_df2))
 
 #daily confirmed cases
-graph_daily = px.bar(chartdata_df2, x='date', y='newCase',
-               labels={
-                   'date': '',
-                   'newCase':''
-               },
-               title='Daily new cases')
-st.plotly_chart(graph_daily)
+st.plotly_chart(daily_confirm_cases(chartdata_df2))
 
 # positive rate
-positive_rate_daily = px.bar(chartdata_df2, x='date', y='Positivity rate',
-                       labels= {
-                           "date": "",
-                           "total_daily": "Positivity Rate (%)"
-                       },
-                       title='Daily Positivity Rate')
-
-st.plotly_chart(positive_rate_daily)
-
-
+st.plotly_chart(daily_positive_rate(chartdata_df2))
 
 st.header('National Vaccination Progress')
 
@@ -262,170 +168,13 @@ with vaccinated_percent:
 
 
 #resitration, target population to be vaccinated
-data= {'type':['individual with 2nd_dose','individual with 1st_dose', 'registered individuals'],
-       'total':[round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1],2),
-                round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1],2),
-                round(vax_reg_malaysia['total'].iloc[-1],2)
-                ]}
-compare_df = pd.DataFrame(data=data)
-target = px.bar(compare_df, x='total', y='type', orientation='h')
+st.plotly_chart(vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia, population_df))
 
-target.update_layout(yaxis_title='', xaxis_title='', showlegend=False, legend_title_text= '')
-target.update_layout(title='Vaccination Target')
-target.update_xaxes(range=[0,30000000], showgrid=False)
-target.update_yaxes(showticklabels=False)
-colors = ['#0c3953']*3    #f67e7d #843b62 #0c3953
-colors[1] = '#009dc4'  #1st dose
-colors[0] = '#a88905'  #2nd dose
-target.update_traces(marker_color=colors, #marker_line_color='#009dc4',       ##009dc4 #a88905
-                  marker_line_width=0, opacity=1, width=0.4)
-# Source
-target.add_annotation(dict(xref='paper', yref='paper', x=0.5, y=-0.1,
-                              xanchor='center', yanchor='top',
-                              text='Source: Covid-19 Immunisation Task Force (CITF)',
-                              font=dict(#family='Arial',
-                              #           size=12,
-                                        color='rgb(150,150,150)'),
-                              showarrow=False))
-target.add_vline(x=26130000, line_width=3, line_dash="dash", line_color="red", #population_df['pop'].iloc[0]
-                 annotation_text="target: 26.13 million <br>(80% population<br> to be vaccinated)",
-                 annotation_position='left')
-
-target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.61,
-                              xanchor='left', yanchor='auto',
-                              text=f"population with at least 1 dose: {round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)} mil " #population with at least 1 dose
-                                   f"({round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
-                              showarrow=False,
-                              #font=dict(family='Arial',
-                                        #size=12,
-                                        # color='rgb(150,150,150)'
-                           ))
-target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.24,
-                              xanchor='left', yanchor='auto',
-                              text= f"fully inoculated: {round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)} mil "
-                                    f"({round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
-                              showarrow=False
-                              #font=dict(family='Arial',
-                                        #size=12,
-                                        # color='rgb(150,150,150)'
-                            ))
-
-target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.97,
-                              xanchor='left', yanchor='auto',
-                              text=f"registration: {round(vax_reg_malaysia['total'].iloc[-1]/1000000,2)} mil "
-                                   f"({round(vax_reg_malaysia['total'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
-                              showarrow=False
-                              #font=dict(family='Arial',
-                                        #size=12,
-                                        # color='rgb(150,150,150)'
-                           ))
-
-
-st.plotly_chart(target)
-
-
-
-
-
-print (compare_df)
-
-#total population is estimated at 32.65 million
-total_pop = population_df.iloc[0]['pop']
-vaccine_df['total_cum/total_pop'] = vaccine_df['dose2_cumul']/ total_pop*100
-vaccine_df['first/total_pop'] = vaccine_df['dose1_cumul']/ total_pop*100
-vaccine_population = px.line(vaccine_df, x='date', y=['first/total_pop','total_cum/total_pop'],
-                       labels={'first/total_pop': '1st dose',
-                                'total_cum/total_pop': '2nd dose'},
-                       title='Population vaccination progress',
-                       template='simple_white',
-                       color_discrete_map={'first/total_pop': '#009dc4',
-                                            'total_cum/total_pop': '#a88905'}
-                         )
-
-def custom_legend_name(fig, new_names):
-    for i, new_name in enumerate(new_names):
-        fig.data[i].name = new_name
-
-custom_legend_name(fig=vaccine_population, new_names=['received 1st dose', 'fully inoculated with 2nd dose'])
-
-vaccine_population.update_yaxes( # the y-axis is in dollars
-     ticksuffix='%',showgrid=True, showticklabels=True            #tickprefix=""
-)
-
-vaccine_population.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text= ''
-                                 )
-
-vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],
-                               y=[vaccine_df.iloc[-2]['total_cum/total_pop']],
-                               text=[f"{round(vaccine_df.iloc[-2]['total_cum/total_pop'],2)}%"],
-                               mode='markers+text',
-                               marker=dict(color='#a88905', size=1),
-                               # textfont=dict(color='', size=20),
-                               textposition='middle left',
-                               showlegend=False)
-
-vaccine_population.add_scatter(x=[vaccine_df.iloc[-2]['date']],
-                               y=[vaccine_df.iloc[-2]['first/total_pop']],
-                               text=[f"{round(vaccine_df.iloc[-2]['first/total_pop'],2)}%"],
-                               mode='markers+text',
-                               marker=dict(color='#009dc4', size=1),
-                               # textfont=dict(color='', size=20),
-                               textposition='middle left',
-                               showlegend=False)
-
-
-#
-# vaccine_population.add_annotation(x='2021-05-09', #[vaccine_df['date'].iloc[-1]]
-#                                   y='10',  #[vaccine_df['total_cum/total_pop'].iloc[-1]]
-#                                   textposition='bottom',
-#                                   text='xxxxxxx',
-#                                   showarrow=True,
-#                                   arrowhead=1
-#                                   )
-
-
-
-
-
-st.plotly_chart(vaccine_population)
-
-
+#vaccination progress
+st.plotly_chart(vaccination_progress_line(vax_malaysia_citf_df, population_df))
 
 # daily vaccine
-vaccine_daily = px.bar(vaccine_df, x='date', y=['dose1_daily','dose2_daily'],
-                       template='simple_white',
-                       labels= {
-                           "date": "",
-                           "dose1_daily": "1st dose",
-                           "dose2_daily": "2nd dose"
-                       },
-                       title='Daily vaccine doses administered',
-                       #color_discrete_sequence=px.colors.sequential.Plasma_r
-                       color_discrete_map={'dose1_daily':'#009dc4',    #rgba(255,0,0,0.4)      #FFA15A    #46039F      #3EB489
-                                            'dose2_daily':'#a88905'}   #E1AD01
-
-                       )
-vaccine_daily.update_yaxes( # the y-axis is in dollars
-    tickprefix="", showgrid=True, showticklabels=True
-)
-vaccine_daily.update_xaxes( # the y-axis is in dollars
-    tickprefix="", showgrid=False
-)
-
-# vaccine_daily.update_traces(marker_color=['green', 'blue'])
-vaccine_daily.update_layout(yaxis_title=None, legend_title_text='')
-
-custom_legend_name(fig=vaccine_daily,new_names=['1st dose', '2nd dose'])
-# vaccine_daily.data[0].marker.line.color = ""
-
-
-st.plotly_chart(vaccine_daily)
-
-
-# daily vaccine
-
-
-#average of xxx doses a day in the past 14 days
+st.plotly_chart(vaccine_daily(vax_malaysia_citf_df))
 
 
 
@@ -439,17 +188,3 @@ st.plotly_chart(vaccine_daily)
 
 
 
-
-
-
-# schedule.every().day.at('07:00').do(job)
-# schedule.every().day.at('19:20').do(job)
-# schedule.every().day.at('19:30').do(job)
-# schedule.every().day.at('20:00').do(job)
-# schedule.every(1).second.do(job)
-# st.experimental_rerun()
-
-# #
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
