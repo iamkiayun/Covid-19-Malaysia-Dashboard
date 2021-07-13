@@ -262,17 +262,61 @@ with vaccinated_percent:
 
 
 #resitration, target population to be vaccinated
-data= {'type':['registered_ind','ind_1st_dose', 'ind_2nd_dose'],
-       'total':[round(vax_reg_malaysia['total'].iloc[-1],2),
+data= {'type':['individual with 2nd_dose','individual with 1st_dose', 'registered individuals'],
+       'total':[round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1],2),
                 round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1],2),
-                round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1],2)]}
+                round(vax_reg_malaysia['total'].iloc[-1],2)
+                ]}
 compare_df = pd.DataFrame(data=data)
 target = px.bar(compare_df, x='total', y='type', orientation='h')
 
 target.update_layout(yaxis_title='', xaxis_title='', showlegend=False, legend_title_text= '')
 target.update_layout(title='Vaccination Target')
-target.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
-                  marker_line_width=1.5, opacity=0.6)
+target.update_xaxes(range=[0,30000000], showgrid=False)
+target.update_yaxes(showticklabels=False)
+colors = ['#0c3953']*3    #f67e7d #843b62 #0c3953
+colors[1] = '#009dc4'  #1st dose
+colors[0] = '#a88905'  #2nd dose
+target.update_traces(marker_color=colors, #marker_line_color='#009dc4',       ##009dc4 #a88905
+                  marker_line_width=0, opacity=1, width=0.4)
+# Source
+target.add_annotation(dict(xref='paper', yref='paper', x=0.5, y=-0.1,
+                              xanchor='center', yanchor='top',
+                              text='Source: Covid-19 Immunisation Task Force (CITF)',
+                              font=dict(#family='Arial',
+                              #           size=12,
+                                        color='rgb(150,150,150)'),
+                              showarrow=False))
+target.add_vline(x=26180000, line_width=3, line_dash="dash", line_color="red",
+                 annotation_text="target: 26.18 million <br> (to be vaccinated)",
+                 annotation_position='left')
+
+target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.61,
+                              xanchor='left', yanchor='auto',
+                              text=f"population with at least 1 dose: {round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)} mil", #population with at least 1 dose
+                              showarrow=False,
+                              #font=dict(family='Arial',
+                                        #size=12,
+                                        # color='rgb(150,150,150)'
+                           ))
+target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.24,
+                              xanchor='left', yanchor='auto',
+                              text= f"fully inoculated: {round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)} mil",
+                              showarrow=False
+                              #font=dict(family='Arial',
+                                        #size=12,
+                                        # color='rgb(150,150,150)'
+                            ))
+
+target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.97,
+                              xanchor='left', yanchor='auto',
+                              text=f"registration: {round(vax_reg_malaysia['total'].iloc[-1]/1000000,2)} mil",
+                              showarrow=False
+                              #font=dict(family='Arial',
+                                        #size=12,
+                                        # color='rgb(150,150,150)'
+                           ))
+
 
 st.plotly_chart(target)
 
