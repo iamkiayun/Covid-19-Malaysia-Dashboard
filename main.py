@@ -144,18 +144,18 @@ with new_cases:
     newDeath = chartdata_df['newDeath'].iloc[0]
     totalDeath = chartdata_df['totalDeath'].iloc[0]
     # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{new_case_no}</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total cases: {totalCase}</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='text-align: left;'>*new test: {int(total_test_conducted)}</h5>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{new_case_no:,}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total cases: {totalCase:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*new test: {int(total_test_conducted):,}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate:,}%</h5>", unsafe_allow_html=True)
     st.text("")
     st.text("")
     st.text("")
 
 with new_death:
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Deaths</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDeath}</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total deaths: {totalDeath}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDeath:,}</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total deaths: {totalDeath:,}</h5>",unsafe_allow_html=True)
 
 
 with total_Icu:
@@ -170,15 +170,15 @@ with total_Icu:
     totalDischarged = chartdata_df['totalDischarged'].iloc[0]
     cure_rate = round(chartdata_df['totalDischarged'].iloc[0]/ chartdata_df['totalCase'].iloc[0]*100,2)
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New ICU</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newIcu}</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*current Icu: {totalIcu}</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*intubated: {totalIntubated}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newIcu:,}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*current Icu: {totalIcu:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*intubated: {totalIntubated:,}</h5>", unsafe_allow_html=True)
 
 with Discharge:
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Discharged</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDischarged}</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*total discharged: {totalDischarged}</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate}%</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDischarged:,}</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; font-size:12.5px; text-align: left; vertical-align: center'>*total discharged: {totalDischarged:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate:,}%</h5>",unsafe_allow_html=True)
 
 # st.write(chartdata_df)
 # chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'] .map('{:,.2f}'.format)
@@ -287,30 +287,33 @@ target.add_annotation(dict(xref='paper', yref='paper', x=0.5, y=-0.1,
                               #           size=12,
                                         color='rgb(150,150,150)'),
                               showarrow=False))
-target.add_vline(x=26180000, line_width=3, line_dash="dash", line_color="red",
-                 annotation_text="target: 26.18 million <br> (to be vaccinated)",
+target.add_vline(x=26130000, line_width=3, line_dash="dash", line_color="red", #population_df['pop'].iloc[0]
+                 annotation_text="target: 26.13 million <br>(80% population<br> to be vaccinated)",
                  annotation_position='left')
 
-target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.61,
+target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.61,
                               xanchor='left', yanchor='auto',
-                              text=f"population with at least 1 dose: {round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)} mil", #population with at least 1 dose
+                              text=f"population with at least 1 dose: {round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)} mil " #population with at least 1 dose
+                                   f"({round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
                               showarrow=False,
                               #font=dict(family='Arial',
                                         #size=12,
                                         # color='rgb(150,150,150)'
                            ))
-target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.24,
+target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.24,
                               xanchor='left', yanchor='auto',
-                              text= f"fully inoculated: {round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)} mil",
+                              text= f"fully inoculated: {round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)} mil "
+                                    f"({round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
                               showarrow=False
                               #font=dict(family='Arial',
                                         #size=12,
                                         # color='rgb(150,150,150)'
                             ))
 
-target.add_annotation(dict(xref='paper', yref='paper', x=0.15, y=0.97,
+target.add_annotation(dict(xref='paper', yref='paper', x=0.07, y=0.97,
                               xanchor='left', yanchor='auto',
-                              text=f"registration: {round(vax_reg_malaysia['total'].iloc[-1]/1000000,2)} mil",
+                              text=f"registration: {round(vax_reg_malaysia['total'].iloc[-1]/1000000,2)} mil "
+                                   f"({round(vax_reg_malaysia['total'].iloc[-1]/population_df['pop'].iloc[0]*100,2)}%)",
                               showarrow=False
                               #font=dict(family='Arial',
                                         #size=12,
