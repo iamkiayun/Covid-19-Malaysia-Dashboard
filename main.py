@@ -47,15 +47,15 @@ This app performs simple visualization of covid-19 status in Malaysia
 st.text("")
 st.text("")
 
-states = ['Sabah', 'Selangor', 'Kuala Lumpur', 'Negeri Sembilan', 'Kedah', 'Pulau Pinang', 'labuan', 'Sarawak', 'Johor', 'Perak', 'Pahang', 'Melaka', 'Terengganu', 'Kelantan', 'Putrajaya', 'Perlis']
-months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-patient_status = ['confirmed cases', 'active cases', 'recovered cases', 'death cases']
-st.sidebar.header('User Input Features')
-selected_year = st.sidebar.selectbox('Year', list(reversed(range(2020,2022))))
-selected_month = st.sidebar.selectbox('Month', list(months))
-visualization = st.sidebar.selectbox('Select a chart type', ('Bar Chart', 'Pie Chart', 'Line Chart'))
-state_select = st.sidebar.selectbox('State', states)
-status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
+
+
+# patient_status = ['confirmed cases', 'active cases', 'recovered cases', 'death cases']
+st.sidebar.header('Select')
+# selected_year = st.sidebar.selectbox('Year', list(reversed(range(2020,2022))))
+selected_month = st.sidebar.selectbox('Month', months())
+visualization = st.sidebar.selectbox('Select', ('Covid-19 Status','Vaccination Status'))
+state_select = st.sidebar.selectbox('State', states())
+# status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
 
 # selected_state =
 

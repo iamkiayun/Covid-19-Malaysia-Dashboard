@@ -30,6 +30,30 @@ def cumul_confirm_cases(chartdata_df2):
                        'totalCase':''
                    },
                    title='Cumulative confirmed cases')
+    cumul_case = chartdata_df2['totalCase'].iloc[-1]
+    # convert from string time to normal time UTC
+    last_date = datetime.strptime(chartdata_df2['date'].iloc[-1], "%d %b %y")
+    # convet from UTC time to string time
+    date_date = last_date.strftime("%d %b %Y")
+    # last_date = pd.to_datetime(chartdata_df2['date'].iloc[-1])
+    # positive_rate_daily.update_yaxes(ticksuffix= '%')
+    # positive_rate_daily.update_layout(yaxis_title="")
+    graph.add_hline(y=cumul_case, line_width=3, line_dash="dash", line_color="red",
+                          # population_df['pop'].iloc[0]
+                          # annotation_text=f"{total_dose_daily:,} doses <br> ( 1st dose: {dose_1_daily:,} doses <br>2nd dose: {dose_2_daily:,}doses) <br><br>", #(80% population<br> to be vaccinated)
+                          # annotation_position='bottom'
+                          )
+    graph.update_yaxes(showgrid=False)
+
+    graph.add_annotation(dict(xref='paper', yref='y', x=0.4, y=cumul_case,
+                                    xanchor='center', yanchor='top',
+                                    text=f"{cumul_case:,} cases <br>as of {date_date}",
+                                    # font=dict(#family='Arial',
+                                    #           size=12,
+                                    #           color='rgb(150,150,150)'),
+                                    showarrow=False,
+                                    align='left'
+                                    ))
     return graph
 
 
@@ -43,6 +67,29 @@ def daily_confirm_cases(chartdata_df2):
                    'newCase':''
                },
                title='Daily new cases')
+    last_new_case = chartdata_df2['newCase'].iloc[-1]
+    #convert from string time to normal time UTC
+    last_date = datetime.strptime(chartdata_df2['date'].iloc[-1], "%d %b %y")
+    #convet from UTC time to string time
+    date_date = last_date.strftime("%d %b %Y")
+    # last_date = pd.to_datetime(chartdata_df2['date'].iloc[-1])
+    # positive_rate_daily.update_yaxes(ticksuffix= '%')
+    # positive_rate_daily.update_layout(yaxis_title="")
+    graph_daily.add_hline(y=last_new_case, line_width=3, line_dash="dash", line_color="red",#population_df['pop'].iloc[0]
+                     # annotation_text=f"{total_dose_daily:,} doses <br> ( 1st dose: {dose_1_daily:,} doses <br>2nd dose: {dose_2_daily:,}doses) <br><br>", #(80% population<br> to be vaccinated)
+                     # annotation_position='bottom'
+                            )
+    graph_daily.update_yaxes(showgrid=False)
+
+    graph_daily.add_annotation(dict(xref='paper', yref='y', x=0.4, y=last_new_case,
+                                  xanchor='center', yanchor='top',
+                                  text=f"{last_new_case:,} new cases <br>on {date_date}",
+                                  # font=dict(#family='Arial',
+                                  #           size=12,
+                                  #           color='rgb(150,150,150)'),
+                                  showarrow=False,
+                                  align='left'
+                                    ))
     return graph_daily
 
 """
@@ -54,10 +101,30 @@ def daily_positive_rate(chartdata_df2):
                            "date": "",
                            "total_daily": "Positivity Rate (%)"
                        },
-                       title='Daily Positivity Rate')
-
+                       title='Daily positivity rate')
+    last_positivity_rate = chartdata_df2['Positivity rate'].iloc[-1]
+    #convert from string time to normal time UTC
+    last_date = datetime.strptime(chartdata_df2['date'].iloc[-1], "%d %b %y")
+    #convet from UTC time to string time
+    date_date = last_date.strftime("%d %b %Y")
+    # last_date = pd.to_datetime(chartdata_df2['date'].iloc[-1])
     positive_rate_daily.update_yaxes(ticksuffix= '%')
     positive_rate_daily.update_layout(yaxis_title="")
+    positive_rate_daily.add_hline(y=last_positivity_rate, line_width=3, line_dash="dash", line_color="red",#population_df['pop'].iloc[0]
+                     # annotation_text=f"{total_dose_daily:,} doses <br> ( 1st dose: {dose_1_daily:,} doses <br>2nd dose: {dose_2_daily:,}doses) <br><br>", #(80% population<br> to be vaccinated)
+                     # annotation_position='bottom'
+                            )
+    positive_rate_daily.update_yaxes(showgrid=False)
+
+    positive_rate_daily.add_annotation(dict(xref='paper', yref='y', x=0.4, y=last_positivity_rate,
+                                  xanchor='center', yanchor='top',
+                                  text=f"{last_positivity_rate}% on<br>{date_date}",
+                                  # font=dict(#family='Arial',
+                                  #           size=12,
+                                  #           color='rgb(150,150,150)'),
+                                  showarrow=False,
+                                  align='left'
+                                    ))
     return positive_rate_daily
 
 """
@@ -88,10 +155,36 @@ def vaccine_daily(vax_malaysia_citf_df):
     # vaccine_daily.update_traces(marker_color=['green', 'blue'])
     vaccine_daily.update_layout(yaxis_title=None, legend_title_text='')
 
+    #add horizontal line
+    dose_1_daily = vax_malaysia_citf_df['dose1_daily'].iloc[-1]
+    dose_2_daily = vax_malaysia_citf_df['dose2_daily'].iloc[-1]
+    total_dose_daily = dose_1_daily + dose_2_daily
+    update_date = pd.to_datetime(vax_malaysia_citf_df['date'].iloc[-1]).strftime("%d %b %Y")
+
+    vaccine_daily.add_hline(y=total_dose_daily, line_width=3, line_dash="dash", line_color="red",#population_df['pop'].iloc[0]
+                     # annotation_text=f"{total_dose_daily:,} doses <br> ( 1st dose: {dose_1_daily:,} doses <br>2nd dose: {dose_2_daily:,}doses) <br><br>", #(80% population<br> to be vaccinated)
+                     # annotation_position='bottom'
+                            )
+    vaccine_daily.update_yaxes(showgrid=False)
+
+    vaccine_daily.add_annotation(dict(xref='paper', yref='y', x=0.69, y=total_dose_daily,
+                                  xanchor='center', yanchor='top',
+                                  text=f"total: {total_dose_daily:,} doses <br>(1st dose: {dose_1_daily:,} doses <br> 2nd dose: {dose_2_daily:,}doses)<br>administered on {update_date}",
+                                  # font=dict(#family='Arial',
+                                  # #           size=12,
+                                  # #           color='rgb(150,150,150)'),
+                                  showarrow=False,
+                                  align='left'
+                                    ))
+
+
     def custom_legend_name(fig, new_names):
         for i, new_name in enumerate(new_names):
             fig.data[i].name = new_name
+
     custom_legend_name(fig=vaccine_daily,new_names=['1st dose', '2nd dose'])
+
+
 
     return vaccine_daily
 
@@ -109,7 +202,7 @@ def vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia,population_df):
     target = px.bar(compare_df, x='total', y='type', orientation='h')
 
     target.update_layout(yaxis_title='', xaxis_title='', showlegend=False, legend_title_text= '')
-    target.update_layout(title='Vaccination Target')
+    target.update_layout(title='Vaccination target')
     target.update_xaxes(range=[0,30000000], showgrid=False)
     target.update_yaxes(showticklabels=False)
     colors = ['#0c3953']*3    #f67e7d #843b62 #0c3953
@@ -160,7 +253,7 @@ def vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia,population_df):
 
     target.add_annotation(dict(xref='paper', yref='paper', x=-0.081, y=1.08,
                                xanchor='left', yanchor='auto',
-                               text=f"* total population estimated at {round(population_df['pop'].iloc[0]/1000000,2)} mil",
+                               text=f"* total population is estimated at {round(population_df['pop'].iloc[0]/1000000,2)} mil",
                                font=dict(color='rgb(150,150,150)'),
                                showarrow=False
                                ))
@@ -309,6 +402,18 @@ def vaccinated_percent_card(vax_malaysia_citf_df, population_df):
     st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*fully inoculated: {population_2nd}%</h5>",unsafe_allow_html=True)
     st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*received 1 dose: {population_1st}%</h5>", unsafe_allow_html=True)
 
+def states():
+    states = ['Sabah', 'Selangor', 'Kuala Lumpur', 'Negeri Sembilan', 'Kedah', 'Pulau Pinang', 'labuan', 'Sarawak',
+              'Johor', 'Perak', 'Pahang', 'Melaka', 'Terengganu', 'Kelantan', 'Putrajaya', 'Perlis']
+
+    return states
+
+
+def months():
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    return months
+
 if __name__ == '__main__':
     cumul_confirm_cases(chartdata_df2)
     daily_confirm_cases(chartdata_df2)
@@ -324,3 +429,5 @@ if __name__ == '__main__':
     daily_doses_card(vax_malaysia_citf_df)
     vaccination_progress_card(vax_malaysia_citf_df)
     vaccinated_percent_card(vax_malaysia_citf_df)
+    states()
+    months()
