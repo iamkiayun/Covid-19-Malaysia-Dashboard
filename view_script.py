@@ -8,6 +8,7 @@ from PIL import Image
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from datetime import datetime
 #scraping
 import requests
 from bs4 import BeautifulSoup
@@ -217,6 +218,97 @@ def vaccination_progress_line(vax_malaysia_citf_df, population_df):
     return vaccine_population
 
 
+def vaccine_updated_datetime(vax_malaysia_citf_df):
+    vax_date_update_ori = pd.to_datetime(vax_malaysia_citf_df['date'].iloc[-1], format='%Y-%m-%d')
+    vax_date_update_converted = vax_date_update_ori.strftime("%b %d, %Y")
+    update_time = datetime.now().strftime("%I:%M %p")
+    statement = f"Updated: {vax_date_update_converted} {update_time}"
+    return statement
+
+
+def new_case_card(chartdata_df):
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Cases</h4>",unsafe_allow_html=True)
+    # st.markdown('**New Cases**')
+    new_case_no = chartdata_df['newCase'].iloc[0]
+    total_test_conducted = chartdata_df['newTest'].iloc[0]
+    positive_rate = chartdata_df['Positivity rate'].iloc[0]
+    totalCase = chartdata_df['totalCase'].iloc[0]
+
+    # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{new_case_no:,}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total cases: {totalCase:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*new test: {int(total_test_conducted):,}</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate:,}%</h5>", unsafe_allow_html=True)
+
+
+def new_death_card(chartdata_df):
+    newDeath = chartdata_df['newDeath'].iloc[0]
+    totalDeath = chartdata_df['totalDeath'].iloc[0]
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Deaths</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDeath:,}</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*total deaths: {totalDeath:,}</h5>",unsafe_allow_html=True)
+
+
+def icu_card(chartdata_df):
+    chartdata_df['Positivity rate'] = chartdata_df['Positivity rate'].map('{:,.2f}'.format)
+    column_list = chartdata_df.drop(['date', 'Positivity rate'], axis=1).columns.tolist()
+    chartdata_df[column_list] = chartdata_df[column_list].fillna(0).astype(dtype=int)
+    chartdata_df.style.format('{:,}', subset=column_list)
+    newIcu = chartdata_df['newIcu'].iloc[0]
+    totalIcu = chartdata_df['totalIcu'].iloc[0]
+    totalIntubated = chartdata_df['intubated'].iloc[0]
+
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New ICU</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newIcu:,}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*current Icu: {totalIcu:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*intubated: {totalIntubated:,}</h5>", unsafe_allow_html=True)
+
+
+def discharge_card(chartdata_df):
+    newDischarged = chartdata_df['newDischarged'].iloc[0]
+    totalDischarged = chartdata_df['totalDischarged'].iloc[0]
+    cure_rate = round(chartdata_df['totalDischarged'].iloc[0]/ chartdata_df['totalCase'].iloc[0]*100,2)
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Discharged</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{newDischarged:,}</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; font-size:12.5px; text-align: left; vertical-align: center'>*total discharged: {totalDischarged:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*cure rate: {cure_rate:,}%</h5>",unsafe_allow_html=True)
+
+
+def daily_doses_card(vax_malaysia_citf_df):
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Doses </h4>",unsafe_allow_html=True)
+    # st.markdown('**New Cases**')
+    daily_total_jab = round(vax_malaysia_citf_df['total_daily'].iloc[-1]/1000,2)
+    daily_1st_jab = round(vax_malaysia_citf_df['dose1_daily'].iloc[-1]/1000,2)
+    daily_2nd_jab = round(vax_malaysia_citf_df['dose2_daily'].iloc[-1]/1000,2)
+
+    # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{daily_total_jab}K</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {daily_1st_jab}K</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*2nd dose: {int(daily_2nd_jab)}K</h5>", unsafe_allow_html=True)
+    # st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
+
+
+def vaccination_progress_card(vax_malaysia_citf_df):
+    vax_total_cumul = round(vax_malaysia_citf_df['total_cumul'].iloc[-1]/1000000,2)
+    vax_1st_cumul = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)
+    vax_2nd_cumul = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>Total Administered</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{vax_total_cumul}M</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {vax_1st_cumul}M</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*2nd dose: {vax_2nd_cumul}M</h5>",unsafe_allow_html=True)
+
+
+def vaccinated_percent_card(vax_malaysia_citf_df, population_df):
+    population_1st = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/population_df['pop'].iloc[0]*100,2)
+    population_2nd = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1] / population_df['pop'].iloc[0]*100, 2)
+    st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>Vaccination Progress</h4>", unsafe_allow_html=True)
+    st.text('')
+    st.text('')
+    st.text('')
+    # st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>x</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*fully inoculated: {population_2nd}%</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 0px; text-align: left; vertical-align: center'>*received 1 dose: {population_1st}%</h5>", unsafe_allow_html=True)
+
 if __name__ == '__main__':
     cumul_confirm_cases(chartdata_df2)
     daily_confirm_cases(chartdata_df2)
@@ -224,3 +316,11 @@ if __name__ == '__main__':
     vaccine_daily(vax_malaysia_citf_df)
     vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia, population_df)
     vaccination_progress_line(vax_malaysia_citf_df, population_df)
+    vaccine_updated_datetime(vax_malaysia_citf_df)
+    new_case_card(chartdata_df)
+    new_death_card(chartdata_df)
+    icu_card(chartdata_df)
+    discharge_card(chartdata_df)
+    daily_doses_card(vax_malaysia_citf_df)
+    vaccination_progress_card(vax_malaysia_citf_df)
+    vaccinated_percent_card(vax_malaysia_citf_df)
