@@ -415,9 +415,150 @@ def months():
     return months
 
 
+#daily vaccination by state
+def daily_vaccination_by_state(vax_2):
+
+    #daily vaccination by state
+    graph = px.bar(vax_2, x=['dose1_daily', 'dose2_daily'], y='state',
+                   title="Daily vaccine doses administered by states",
+                   color_discrete_sequence=['#009dc4','#a88905'],
+                   # text= states()
+                   )
+
+    # graph.update_traces(texttemplate='%{text:.2s}', textposition='outside', textfont_size=14)
+    graph.update_xaxes(  # the y-axis is in dollars
+        ticksuffix='', showgrid=True, showticklabels=True  # tickprefix=""
+    )
+
+    graph.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text=''
+                                     )
 
 
+    def custom_legend_name(fig, new_names):
+        for i, new_name in enumerate(new_names):
+            fig.data[i].name = new_name
 
+
+    custom_legend_name(fig=graph, new_names=['1st dose', '2nd dose'])
+
+    graph.update_traces( marker_line_color='rgb(8,48,107)',#marker_color='rgb(158,202,225)',
+                      marker_line_width=0, opacity=0.9)
+
+    return graph
+
+
+#cummulative doses by states
+def cummulative_doses_by_states(vax_2_with_pop_reg):
+
+    dose1 = vax_2_with_pop_reg['dose1_cumul']
+    dose2 = vax_2_with_pop_reg['dose2_cumul']
+
+    fig = go.Figure()
+    anchos = [0.4]* 16
+
+    fig.add_trace((go.Bar(x=dose1,
+                          y=vax_2_with_pop_reg['state'],
+                          width= anchos, name='1st dose',
+                          text= dose1,
+                          orientation='h',
+                          offset=0,
+                          marker_color='#009dc4' #004a6a #94a6bb #d0cac0
+                          )))
+
+    fig.add_trace((go.Bar(x=dose2,
+                          y=vax_2_with_pop_reg['state'],
+                          width= anchos, name='2nd dose',
+                          text= dose2,
+                          orientation='h',
+                          # offset=-0.15,
+                          marker_color='#a88905'
+                          )))
+
+    fig.update_layout(title = "Cummulative vaccine doses administered by states",
+                      barmode = 'overlay',#title_font_size = 40,
+                      width = 800, height = 600
+                      )
+    fig.update_traces( marker_line_color='rgb(8,48,107)',#marker_color='rgb(158,202,225)',
+                      marker_line_width=0, opacity=0.9)
+
+    fig.update_xaxes(showgrid=True, ticksuffix='')
+    # fig.add_vline(x=1000000, line_width=3, line_dash="dash", line_color="red",  # population_df['pop'].iloc[0]
+    #                  annotation_text="target:  <br>(80% population<br> to be vaccinated)",
+    #                  annotation_position='left')
+
+    return fig
+
+
+#vaccination progress by state based on percentage
+def vaccination_by_state_percent(vax_2_with_pop_reg):
+
+    dose1_percent = vax_2_with_pop_reg['dose1_cumul']/vax_2_with_pop_reg['pop']*100
+    dose2_percent = vax_2_with_pop_reg['dose2_cumul']/vax_2_with_pop_reg['pop']*100
+    reg_percent = vax_2_with_pop_reg['total']/vax_2_with_pop_reg['pop']*100
+    vax_daily_state_percent = round(vax_2_with_pop_reg['total_daily'] / vax_2_with_pop_reg['pop'] * 100, 2)
+
+
+    fig = go.Figure()
+    anchos = [0.3]* 16
+
+    fig.add_trace((go.Bar(x=reg_percent,
+                          y=vax_2_with_pop_reg['state'],
+                          width= anchos, name='registration',
+                          text= reg_percent,
+                          orientation='h',
+                          offset=0,
+                          marker_color='#5a7d9f' #004a6a #94a6bb #d0cac0
+                          )))
+
+    fig.add_trace((go.Bar(x=dose1_percent,
+                          y=vax_2_with_pop_reg['state'],
+                          width= anchos, name='1st dose',
+                          text= dose1_percent,
+                          orientation='h',
+                          offset=-0.15,
+                          marker_color='#009dc4'
+                          )))
+    fig.add_trace((go.Bar(x=dose2_percent,
+                          y=vax_2_with_pop_reg['state'],
+                          width= anchos, name='2nd dose',
+                          text= dose2_percent,
+                          orientation='h',
+                          offset=-0.3,
+                          marker_color='#a88905'
+                          )))
+
+
+    fig.update_layout(title = "Vaccination progress by states",
+                      barmode = 'overlay',#title_font_size = 40,
+                      width = 800, height = 600
+                      )
+    fig.update_traces( marker_line_color='rgb(8,48,107)',#marker_color='rgb(158,202,225)',
+                      marker_line_width=0, opacity=0.9)
+
+    fig.update_xaxes(showgrid=False, ticksuffix='%')
+    fig.add_vline(x=80, line_width=3, line_dash="dash", line_color="red",  # population_df['pop'].iloc[0]
+                     annotation_text="target:  <br>(80% population<br> to be vaccinated)",
+                     annotation_position='left')
+
+    return fig
+
+
+#derive dataframe
+def derive_dataframe(vax_state_citf_df, population_df, vax_reg_state):
+    vax_progress_by_state_df = vax_state_citf_df.set_index('state').reset_index()
+    vax_2 = vax_progress_by_state_df.groupby(['state']).last().reset_index()
+    vax_2['date'] = pd.to_datetime(vax_2['date'], format='%Y-%m-%d')
+    vax_2['date'] = vax_2['date'].dt.strftime("%d %b %Y")
+    column_list_to_amend = vax_2.drop(['date', 'state'], axis=1).columns.tolist()
+
+    vax_2_with_pop = pd.merge(vax_2, population_df, on='state', how='left')
+    new_vax_reg_state = vax_reg_state.groupby(['state']).last().reset_index()
+    vax_2_with_pop_reg = pd.merge(vax_2_with_pop, new_vax_reg_state, on='state', how='left')
+
+    vax_daily_state_percent = round(vax_2_with_pop_reg['total_daily'] / vax_2_with_pop_reg['pop'] * 100, 2)
+
+
+    return vax_progress_by_state_df, vax_2, column_list_to_amend, vax_2_with_pop, new_vax_reg_state, vax_2_with_pop_reg, vax_daily_state_percent
 
 
 
@@ -438,3 +579,7 @@ if __name__ == '__main__':
     vaccinated_percent_card(vax_malaysia_citf_df)
     states()
     months()
+    daily_vaccination_by_state(vax_2)
+    cummulative_doses_by_states(vax_2_with_pop_reg)
+    vaccination_by_state_percent(vax_2_with_pop_reg)
+    derive_dataframe(vax_state_citf_df, population_df, vax_reg_state)
