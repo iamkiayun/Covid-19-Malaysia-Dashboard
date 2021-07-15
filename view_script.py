@@ -370,25 +370,25 @@ def discharge_card(chartdata_df):
 def daily_doses_card(vax_malaysia_citf_df):
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>New Doses </h4>",unsafe_allow_html=True)
     # st.markdown('**New Cases**')
-    daily_total_jab = round(vax_malaysia_citf_df['total_daily'].iloc[-1]/1000,2)
-    daily_1st_jab = round(vax_malaysia_citf_df['dose1_daily'].iloc[-1]/1000,2)
-    daily_2nd_jab = round(vax_malaysia_citf_df['dose2_daily'].iloc[-1]/1000,2)
+    daily_total_jab = round(vax_malaysia_citf_df['total_daily'].iloc[-1],2)
+    daily_1st_jab = round(vax_malaysia_citf_df['dose1_daily'].iloc[-1],2)
+    daily_2nd_jab = round(vax_malaysia_citf_df['dose2_daily'].iloc[-1],2)
 
     # st.markdown("<h4 style='line-height: 10px; text-align: left; vertical-align: center'>num.toLocalString</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{daily_total_jab}K</h4>", unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {daily_1st_jab}K</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='text-align: left;'>*2nd dose: {int(daily_2nd_jab)}K</h5>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{daily_total_jab:,}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {daily_1st_jab:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='text-align: left;'>*2nd dose: {int(daily_2nd_jab):,}</h5>", unsafe_allow_html=True)
     # st.markdown(f"<h5 style='text-align: left;'>*+ve rate: {positive_rate}%</h5>", unsafe_allow_html=True)
 
 
 def vaccination_progress_card(vax_malaysia_citf_df):
-    vax_total_cumul = round(vax_malaysia_citf_df['total_cumul'].iloc[-1]/1000000,2)
-    vax_1st_cumul = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1]/1000000,2)
-    vax_2nd_cumul = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1]/1000000,2)
+    vax_total_cumul = round(vax_malaysia_citf_df['total_cumul'].iloc[-1],2)
+    vax_1st_cumul = round(vax_malaysia_citf_df['dose1_cumul'].iloc[-1],2)
+    vax_2nd_cumul = round(vax_malaysia_citf_df['dose2_cumul'].iloc[-1],2)
     st.markdown(f"<h4 style='line-height: 6px; text-align: left; vertical-align: center'>Total Administered</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{vax_total_cumul}M</h4>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {vax_1st_cumul}M</h5>",unsafe_allow_html=True)
-    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*2nd dose: {vax_2nd_cumul}M</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h4 style='line-height: 30px; text-align: left; vertical-align: center'>{vax_total_cumul:,}</h4>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*1st dose: {vax_1st_cumul:,}</h5>",unsafe_allow_html=True)
+    st.markdown(f"<h5 style='line-height: 10px; text-align: left; vertical-align: center'>*2nd dose: {vax_2nd_cumul:,}</h5>",unsafe_allow_html=True)
 
 
 def vaccinated_percent_card(vax_malaysia_citf_df, population_df):
@@ -413,6 +413,13 @@ def months():
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
     return months
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     cumul_confirm_cases(chartdata_df2)

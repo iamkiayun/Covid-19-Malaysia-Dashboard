@@ -119,17 +119,114 @@ st.plotly_chart(vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia, popul
 st.plotly_chart(vaccination_progress_line(vax_malaysia_citf_df, population_df))
 
 # daily vaccine
+
 st.plotly_chart(vaccine_daily(vax_malaysia_citf_df))
 
 
+#daily state vaccination status
 
 
 
+#state vaccination progress
+# vax_state_citf_df
+# vax_reg_state
+# population_df
+
+vax_progress_by_state_df = vax_state_citf_df.set_index('state').reset_index()
+vax_2 = vax_progress_by_state_df.groupby(['state']).last().reset_index()
+vax_2['date'] = pd.to_datetime(vax_2['date'], format='%Y-%m-%d')
+vax_2['date'] = vax_2['date'].dt.strftime("%d %b %Y")
 
 
+#vaccination administration dataframe
+
+column_list_to_amend = vax_2.drop(['date', 'state'], axis=1).columns.tolist()
+st.dataframe(vax_2.style.format('{:,}', subset=column_list_to_amend))
+vax_2_with_pop = pd.merge(vax_2, population_df, on='state', how='left')
+new_vax_reg_state =vax_reg_state.groupby(['state']).last().reset_index()
+vax_2_with_pop_reg = pd.merge(vax_2_with_pop, new_vax_reg_state, on='state', how='left')
+
+#vaccination by state
+graph = px.bar(vax_2, x=['dose1_daily', 'dose2_daily'], y='state',
+               title="Daily vaccine administered by state",
+               color_discrete_sequence=['#009dc4','#a88905']
+               )
+
+graph.update_xaxes(  # the y-axis is in dollars
+    ticksuffix='', showgrid=False, showticklabels=True  # tickprefix=""
+)
+
+graph.update_layout(yaxis_title='', xaxis_title='', showlegend=True, legend_title_text=''
+                                 )
 
 
+def custom_legend_name(fig, new_names):
+    for i, new_name in enumerate(new_names):
+        fig.data[i].name = new_name
 
 
+custom_legend_name(fig=graph, new_names=['1st dose', '2nd dose'])
 
+
+st.plotly_chart(graph)
+
+
+#vaccination progress by state based on doses, registration
+
+graph_x = px.bar(vax_2_with_pop_reg,
+                 x=['total', 'dose1_cumul', 'dose2_cumul'] ,
+                 y='state'
+                )
+
+st.plotly_chart(graph_x)
+
+#vaccination progress by state based on percentage
+dose1_percent = vax_2_with_pop_reg['dose1_cumul']/vax_2_with_pop_reg['pop']*100
+dose2_percent = vax_2_with_pop_reg['dose2_cumul']/vax_2_with_pop_reg['pop']*100
+reg_percent = vax_2_with_pop_reg['total']/vax_2_with_pop_reg['pop']*100
+
+
+fig = go.Figure()
+anchos = [0.3]* 16
+
+fig.add_trace((go.Bar(x=reg_percent,
+                      y=vax_2_with_pop_reg['state'],
+                      width= anchos, name='registration',
+                      text= reg_percent,
+                      orientation='h',
+                      offset=0,
+                      marker_color='#5a7d9f' #004a6a #94a6bb #d0cac0
+                      )))
+
+fig.add_trace((go.Bar(x=dose1_percent,
+                      y=vax_2_with_pop_reg['state'],
+                      width= anchos, name='1st dose',
+                      text= dose1_percent,
+                      orientation='h',
+                      offset=-0.15,
+                      marker_color='#009dc4'
+                      )))
+fig.add_trace((go.Bar(x=dose2_percent,
+                      y=vax_2_with_pop_reg['state'],
+                      width= anchos, name='2nd dose',
+                      text= dose2_percent,
+                      orientation='h',
+                      offset=-0.3,
+                      marker_color='#a88905'
+                      )))
+
+
+fig.update_layout(title = "Vaccination Progress by States",
+                  barmode = 'overlay',title_font_size = 40,
+                  width = 800, height = 600
+                  )
+fig.update_traces( marker_line_color='rgb(8,48,107)',#marker_color='rgb(158,202,225)',
+                  marker_line_width=0, opacity=0.9)
+
+fig.update_xaxes(showgrid=False, ticksuffix='%')
+fig.add_vline(x=80, line_width=3, line_dash="dash", line_color="red",  # population_df['pop'].iloc[0]
+                 annotation_text="target:  <br>(80% population<br> to be vaccinated)",
+                 annotation_position='left')
+
+st.plotly_chart(fig)
 
