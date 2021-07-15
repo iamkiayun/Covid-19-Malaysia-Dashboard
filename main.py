@@ -21,8 +21,12 @@ from scraper_covid import scrape_kini_labs
 import schedule
 import time
 
-"""to activate back"""
-# scrape_kini_labs()
+#"""to activate back"""
+try:
+    scrape_kini_labs()
+except :
+    pass
+
 
 chartdata_df = pd.read_csv('covid_data_updated_descending.csv')
 chartdata_df2 = pd.read_csv('covid_data_updated_ascending.csv')
@@ -50,12 +54,12 @@ st.text("")
 
 
 # patient_status = ['confirmed cases', 'active cases', 'recovered cases', 'death cases']
-st.sidebar.header('Select')
-# selected_year = st.sidebar.selectbox('Year', list(reversed(range(2020,2022))))
-selected_month = st.sidebar.selectbox('Month', months())
-visualization = st.sidebar.selectbox('Select', ('Covid-19 Status','Vaccination Status'))
-state_select = st.sidebar.selectbox('State', states())
-# status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
+# st.sidebar.header('Select')
+# # selected_year = st.sidebar.selectbox('Year', list(reversed(range(2020,2022))))
+# selected_month = st.sidebar.selectbox('Month', months())
+# visualization = st.sidebar.selectbox('Select', ('Covid-19 Status','Vaccination Status'))
+# state_select = st.sidebar.selectbox('State', states())
+# # status_select = st.sidebar.radio('Covid-19 patient status', patient_status)
 
 # selected_state =
 
@@ -83,14 +87,18 @@ with Discharge:
 column_list = chartdata_df.drop(['date', 'Positivity rate'], axis=1).columns.tolist()
 st.dataframe(chartdata_df.style.format('{:,}', subset=column_list))
 
-#cummulative confirmed cases
-st.plotly_chart(cumul_confirm_cases(chartdata_df2))
-
 #daily confirmed cases
 st.plotly_chart(daily_confirm_cases(chartdata_df2))
 
+#cummulative confirmed cases
+st.plotly_chart(cumul_confirm_cases(chartdata_df2))
+
 # positive rate
 st.plotly_chart(daily_positive_rate(chartdata_df2))
+
+st.subheader('By states')
+with st.beta_expander(f"Click me!"):
+    st.markdown("""development is ongoing!!!""")
 
 
 st.title('National Vaccination Progress')
@@ -112,15 +120,25 @@ with vaccination_progress:
 with vaccinated_percent:
     vaccinated_percent_card(vax_malaysia_citf_df=vax_malaysia_citf_df, population_df=population_df)
 
-#resitration, target population to be vaccinated
-st.plotly_chart(vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia, population_df))
+st.subheader('Overall Vaccination Status')
+with st.beta_expander(f"Click me!"):
+    #resitration, target population to be vaccinated
+    st.plotly_chart(vaccination_target(vax_malaysia_citf_df, vax_reg_malaysia, population_df))
 
-#vaccination progress
-st.plotly_chart(vaccination_progress_line(vax_malaysia_citf_df, population_df))
+    #vaccination progress
+    st.plotly_chart(vaccination_progress_line(vax_malaysia_citf_df, population_df))
 
-# daily vaccine
+    # daily vaccine
 
-st.plotly_chart(vaccine_daily(vax_malaysia_citf_df))
+    st.plotly_chart(vaccine_daily(vax_malaysia_citf_df))
+
+
+
+# vaccination_by_states_expander = st.beta_expander(label='vaccination status by states')
+# with vaccination_by_states_expander:
+
+
+
 
 
 #daily state vaccination dataframe
@@ -133,18 +151,20 @@ vax_2_with_pop = pd.merge(vax_2, population_df, on='state', how='left')
 new_vax_reg_state = vax_reg_state.groupby(['state']).last().reset_index()
 vax_2_with_pop_reg = pd.merge(vax_2_with_pop, new_vax_reg_state, on='state', how='left')
 
+st.subheader('Vaccination status by states')
+with st.beta_expander(f"Click me!"):
+    #dataframe
+    st.dataframe(vax_2.style.format('{:,}', subset=column_list_to_amend))
 
-#dataframe
-st.dataframe(vax_2.style.format('{:,}', subset=column_list_to_amend))
+    #vaccination by states by percentage
+    st.plotly_chart(vaccination_by_state_percent(vax_2_with_pop_reg))
+
+    #state vaccination progress
+    st.plotly_chart(daily_vaccination_by_state(vax_2))
+
+    #cummulative vaccination by states
+    st.plotly_chart(cummulative_doses_by_states(vax_2_with_pop_reg))
 
 
-#state vaccination progress
-st.plotly_chart(daily_vaccination_by_state(vax_2))
 
-#cummulative vaccination by states
-st.plotly_chart(cummulative_doses_by_states(vax_2_with_pop_reg))
-
-
-#vaccination by states by percentage
-st.plotly_chart(vaccination_by_state_percent(vax_2_with_pop_reg))
 
